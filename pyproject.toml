@@ -1,0 +1,12 @@
+[project]
+name = "document-ai-poc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-cloud-documentai>=3.9.0",
+    "google-cloud-storage>=3.8.0",
+    "psycopg2-binary>=2.9.11",
+    "python-dotenv>=1.2.1",
+]
