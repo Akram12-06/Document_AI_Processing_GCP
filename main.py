@@ -30,7 +30,7 @@ def main():
         processor = InvoiceProcessor()
         
         # Process all invoices in the input folder
-        summary = processor.bbb()
+        summary = processor.process_all_invoices()
         
         # Log results
         logger.info("\n" + "=" * 80)

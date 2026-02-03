@@ -73,7 +73,7 @@ if [ -z "$SCHEDULER_EXISTS" ]; then
     echo "Creating new scheduler job..."
     gcloud scheduler jobs create http invoice-processor-scheduler \
         --location ${REGION} \
-        --schedule "*/15 * * * *" \
+        --schedule "*/50 * * * *" \
         --uri "https://${REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${PROJECT_ID}/jobs/${JOB_NAME}:run" \
         --http-method POST \
         --oauth-service-account-email ${SERVICE_ACCOUNT} \
@@ -82,7 +82,7 @@ else
     echo "Updating existing scheduler job..."
     gcloud scheduler jobs update http invoice-processor-scheduler \
         --location ${REGION} \
-        --schedule "*/15 * * * *" \
+        --schedule "*/50 * * * *" \
         --uri "https://${REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${PROJECT_ID}/jobs/${JOB_NAME}:run" \
         --http-method POST \
         --oauth-service-account-email ${SERVICE_ACCOUNT} \

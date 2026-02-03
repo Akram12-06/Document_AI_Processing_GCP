@@ -37,7 +37,18 @@ def test_multiple_values_storage():
         gcs_path='gs://test/test_multiple_values.pdf',
         status='SUCCESS',
         entities=test_entities,
-        avg_confidence=0.89
+        raw_processor_output={
+            'test_data': True,
+            'entities_count': len(test_entities),
+            'mock_document': {
+                'text': 'Mock invoice document text',
+                'pages': [{'page_number': 0}],
+                'metadata': {
+                    'total_entities': len(test_entities),
+                    'processing_timestamp': '2026-02-02T10:00:00Z'
+                }
+            }
+        }
     )
     
     print(f"✅ Stored with processing_id: {processing_id}")
