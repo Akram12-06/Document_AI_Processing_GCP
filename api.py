@@ -278,7 +278,7 @@ async def get_processing_stats():
         return ProcessingStats(
             total_documents=stats[0] or 0,
             successful=stats[1] or 0,
-            failed=stats[2] or 0,  # Only processing failures
+            failed=(stats[2] or 0) + (stats[3] or 0),  # Both processing and validation failures
             processing_failed=stats[2] or 0,
             validation_failed=stats[3] or 0,
             pending_review=stats[4] or 0,
@@ -559,7 +559,10 @@ async def upload_files(files: List[UploadFile] = File(...)):
             try:
                 # Validate file type
                 if not file.filename.lower().endswith('.pdf'):
-                    failed_files.append(f"{file.filename}: Not a PDF file")
+                    failed_files.append({
+                        "file_name": file.filename,
+                        "error": "Not a PDF file"
+                    })
                     continue
                 
                 # Read file content
@@ -570,12 +573,20 @@ async def upload_files(files: List[UploadFile] = File(...)):
                 blob = bucket.blob(blob_name)
                 
                 blob.upload_from_string(content, content_type="application/pdf")
-                uploaded_files.append(file.filename)
+                uploaded_files.append({
+                    "file_name": file.filename,
+                    "size": len(content),
+                    "gcs_path": f"gs://{gcs_manager.bucket_name}/{blob_name}",
+                    "upload_time": datetime.now().isoformat()
+                })
                 
                 logger.info(f"Uploaded file: {file.filename}")
                 
             except Exception as e:
-                failed_files.append(f"{file.filename}: {str(e)}")
+                failed_files.append({
+                    "file_name": file.filename,
+                    "error": str(e)
+                })
                 logger.error(f"Failed to upload {file.filename}: {str(e)}")
         
         return UploadResponse(
@@ -664,89 +675,10 @@ async def get_processing_status():
 
 
 
-@app.post("/api/upload")
-async def upload_files(files: List[UploadFile] = File(...)):
-    """Upload multiple files to GCS staging area"""
-    uploaded_files = []
-    
-    try:
-        for file in files:
-            # Validate file type
-            if not file.filename.lower().endswith('.pdf'):
-                raise HTTPException(
-                    status_code=400, 
-                    detail=f"Only PDF files are allowed. Invalid file: {file.filename}"
-                )
-            
-            # Upload to GCS staging bucket
-            staging_bucket = config.STAGING_BUCKET
-            file_key = f"staging/{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
-            
-            gcs_manager = GCSFileManager()
-            gcs_url = await gcs_manager.upload_file(
-                file.file, 
-                staging_bucket, 
-                file_key
-            )
-            
-            uploaded_files.append({
-                "file_name": file.filename,
-                "file_key": file_key,
-                "gcs_url": gcs_url,
-                "size": file.size,
-                "upload_time": datetime.utcnow().isoformat()
-            })
-            
-    except Exception as e:
-        logger.error(f"Upload failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-    
-    return {"uploaded_files": uploaded_files}
-
-@app.post("/api/trigger-processing")
-async def trigger_processing(file_keys: List[str]):
-    """Trigger document processing for uploaded files"""
-    try:
-        processing_results = []
-        
-        for file_key in file_keys:
-            # Move file from staging to processing bucket
-            gcs_manager = GCSFileManager()
-            final_key = file_key.replace("staging/", "")
-            
-            # Move file
-            success = await gcs_manager.move_file(
-                config.STAGING_BUCKET, file_key,
-                config.GCS_BUCKET, final_key
-            )
-            
-            if success:
-                # Trigger processing
-                from src.invoice_processor import InvoiceProcessor
-                processor = InvoiceProcessor()
-                
-                result = await processor.process_document(
-                    bucket_name=config.GCS_BUCKET,
-                    file_name=final_key
-                )
-                
-                processing_results.append({
-                    "file_key": file_key,
-                    "processing_id": result.get("processing_id"),
-                    "status": "processing_started"
-                })
-            else:
-                processing_results.append({
-                    "file_key": file_key,
-                    "status": "failed_to_move",
-                    "error": "Could not move file to processing bucket"
-                })
-        
-        return {"processing_results": processing_results}
-        
-    except Exception as e:
-        logger.error(f"Processing trigger failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to trigger processing: {str(e)}")
+## Removed duplicate '/api/upload' and '/api/trigger-processing' definitions below.
+## The canonical endpoints are defined earlier in this file:
+## - POST /api/upload: uploads PDFs into the configured input folder of the main bucket
+## - POST /api/trigger-processing: kicks off processing using the executor
 
 @app.get("/api/stats")
 async def get_dashboard_stats():

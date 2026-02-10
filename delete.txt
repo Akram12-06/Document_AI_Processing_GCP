@@ -1,11 +1,7 @@
-2026-02-03 11:14:16,682 - __main__ - ERROR - Failed to get document detail: 3 validation errors for DocumentDetail
-exception_entities
-  Input should be a valid dictionary [type=dict_type, input_value=[], input_type=list]
+"GET /openapi.json HTTP/1.1" 200 OK
+2026-02-03 14:13:36,017 - __main__ - INFO - Uploaded file: invoice_1.pdf
+2026-02-03 14:13:36,018 - __main__ - ERROR - Upload failed: 1 validation error for UploadResponse
+uploaded_files.0
+  Input should be a valid dictionary [type=dict_type, input_value='invoice_1.pdf', input_type=str]
     For further information visit https://errors.pydantic.dev/2.12/v/dict_type
-has_raw_output
-  Field required [type=missing, input_value={'id': 5, 'file_name': 'T..., 3, 9, 31, 30, 867691)}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-total_entities
-  Field required [type=missing, input_value={'id': 5, 'file_name': 'T..., 3, 9, 31, 30, 867691)}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-INFO:     127.0.0.1:44528 - "GET /api/documents/5 HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:58922 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
