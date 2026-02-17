@@ -1,0 +1,15 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'build'
+      - '--build-arg'
+      - 'VITE_API_BASE_URL=${_VITE_API_BASE_URL}'
+      - '-t'
+      - '${_IMAGE_NAME}'
+      - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_IMAGE_NAME}']
+
+substitutions:
+  _VITE_API_BASE_URL: 'https://document-ai-api-642928170435.us-central1.run.app'
+  _IMAGE_NAME: '${_IMAGE_NAME}'

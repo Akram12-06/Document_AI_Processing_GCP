@@ -44,7 +44,7 @@ def upload_pdfs_to_gcs(
     print(f"\nDone. Uploaded {len(pdf_files)} PDFs to GCS.")
 
 if __name__ == "__main__":
-    LOCAL_FOLDER = "/home/si_akram/Document_processing/sample_invoices/test"   # change this
+    LOCAL_FOLDER = "/home/si_akram/Downloads/Processing_docuemtns"   # change this
     BUCKET_NAME = "sample_invoice_bucket_coe"   # change this
     GCS_PREFIX = "input"  
     # GCS_PREFIX = "unprocessed_invoice"         # optional folder in bucket
